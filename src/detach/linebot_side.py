@@ -1,4 +1,5 @@
 import os
+import requests
 
 from dotenv import load_dotenv
 from flask import Flask, request, abort
@@ -51,15 +52,19 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessageContent)
 def handle_message(event):
+    r = requests.post(os.getenv('DISCORD_BOT_URL'))
+    if r.status_code != '200':
+        print('Request send error!') #pseudo code
+
     with ApiClient(configuration) as api_client:
         line_bot_api = MessagingApi(api_client)
+         
         line_bot_api.reply_message_with_http_info(
             ReplyMessageRequest(
                 reply_token=event.reply_token,
                 messages=[TextMessage(text=event.message.text)]
             )
         )
-
 
 if __name__ == '__main__':
     app.run(port=os.getenv('PORT'))
